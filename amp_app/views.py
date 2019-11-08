@@ -62,8 +62,6 @@ def webhook():
 
 @app.route("/landingpage")
 def landingpage():
-    if not utils._user_is_authenticated():
-        return redirect(url_for("login"))
     token = request.args.get('token')
     subscription = amprepo.get_subscriptionid_by_token(token)
     if not token or 'id' not in subscription:
@@ -76,8 +74,6 @@ def landingpage():
 
 @app.route("/edit/<subscriptionid>")
 def edit(subscriptionid):
-    if not utils._user_is_authenticated():
-        return redirect(url_for("login"))
     subscription = amprepo.get_subscription(subscriptionid)
     plans = amprepo.get_availableplans(subscriptionid)
     return render_template(constant.MANAGE_SUBSCRIPTION_PAGE, user=session["user"], subscription=subscription, available_plans=plans)
@@ -85,8 +81,6 @@ def edit(subscriptionid):
 
 @app.route("/update", methods=['POST'])
 def updatesubscription():
-    if not utils._user_is_authenticated():
-        return redirect(url_for("login"))
     selected_subscription = request.form['subscription_id']
     
     if 'activate' in request.form:
@@ -106,8 +100,6 @@ def updatesubscription():
 
 @app.route("/operations/<subscriptionid>")
 def operations(subscriptionid):
-    if not utils._user_is_authenticated():
-        return redirect(url_for("login"))
     subname = request.args.get('subscriptionname')
     sub_operations_by_subid = amprepo.get_sub_operations(subscriptionid)
     sub_operations_by_webhook = amprepo.get_sub_operations_webhook(subscriptionid)
@@ -119,8 +111,6 @@ def operations(subscriptionid):
 # need to save the response
 @app.route("/updateoperation/<operationid>")
 def updateoperation(operationid):
-    if not utils._user_is_authenticated():
-        return redirect(url_for("login"))
     subid = request.args.get('subid')
     planid = request.args.get('planid')
     quantity = request.args.get('quantity')
@@ -138,3 +128,11 @@ def logout():
         #app_config.AUTHORITY + "/" + app_config.TENANT_ID + "/oauth2/v2.0/logout" +
         app_config.AUTHORITY + "/common/oauth2/v2.0/logout" +
         "?post_logout_redirect_uri=" + url_for("login", _external=True, _scheme=app_config.HTTP_SCHEME))
+
+
+@app.before_request
+def before_request_func():
+    app.logger.info(request.endpoint)
+    token = utils._get_token_from_cache(app_config.SCOPE)
+    if (not session.get("user") or session.get("user") is None or not token or token is None) and request.endpoint !='login' and request.endpoint !='authorized':
+        return redirect(url_for("login"))
