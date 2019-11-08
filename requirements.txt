@@ -1,0 +1,20 @@
+#  pip install virtualenv
+#  python -m venv env3
+#  env3\Scripts\activate
+# pip install -r requirements.txt
+# our application server
+
+flask
+flask_restful
+Flask-Session
+requests
+msal
+python-dotenv
+azure-common
+azure-nspkg
+azure-storage
+cryptography
+PyJWT
+gunicorn
+
+#https://github.com/Microsoft/python-sample-vscode-flask-tutorial
