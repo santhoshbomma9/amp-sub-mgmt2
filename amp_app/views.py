@@ -3,15 +3,34 @@ import msal
 from flask import (
     Flask, jsonify, redirect, render_template, request, session, url_for)
 from flask_session import Session
-from . import amprepo
-from . import app_config
-from . import constant
-from . import utils
-from . import app
+from . import amprepo, app_config, constant, utils, app
+from functools import wraps
 
 app.config.from_object(app_config)
 Session(app)
+requested_url =''
 
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get("user"):
+            return redirect(url_for('login', next=request.url))
+        return f(*args, **kwargs)
+    return decorated_function
+
+
+def admin_login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get("isadmin") or session.get("isadmin") == False:
+            return render_template(constant.ERROR_PAGE, user=session["user"]) 
+        return f(*args, **kwargs)
+    return decorated_function
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template(constant.ERROR_PAGE, user=session["user"]), 404
 
 @app.route("/")
 def login():
@@ -21,11 +40,22 @@ def login():
                     [],  # openid+profile are included by default
                     state=session["state"],
                     redirect_uri=url_for("authorized", _external=True, _scheme=app_config.HTTP_SCHEME))
-
         return redirect(auth_url, code=302)
     else:
-        subscriptions = amprepo.get_subscriptions()
-        return render_template('index.html', user=session["user"], subscriptions=subscriptions, version=msal.__version__)
+        global requested_url
+        if requested_url:
+            return redirect(requested_url)
+        else:
+            return redirect(url_for("dashboard"))
+
+
+@app.route("/dashboard")
+@login_required
+@admin_login_required
+def dashboard():
+    subscriptions = amprepo.get_subscriptions()
+    return render_template('index.html', user=session["user"], subscriptions=subscriptions, version=msal.__version__)
+
 
 
 @app.route(app_config.REDIRECT_PATH)  # your app's redirect_uri set in AAD
@@ -40,6 +70,7 @@ def authorized():
             return "Login failure: %s, %s" % (
                 result["error"], result.get("error_description"))
         session["user"] = result.get("id_token_claims")
+        session["isadmin"] = app_config.TENANT_ID in session["user"]['iss']
         utils._save_cache(cache)
     return redirect(url_for("login"))
 
@@ -61,6 +92,7 @@ def webhook():
 
 
 @app.route("/landingpage")
+@login_required
 def landingpage():
     token = request.args.get('token')
     subscription = amprepo.get_subscriptionid_by_token(token)
@@ -73,6 +105,7 @@ def landingpage():
 
 
 @app.route("/edit/<subscriptionid>")
+@login_required
 def edit(subscriptionid):
     subscription = amprepo.get_subscription(subscriptionid)
     plans = amprepo.get_availableplans(subscriptionid)
@@ -80,6 +113,8 @@ def edit(subscriptionid):
 
 
 @app.route("/update", methods=['POST'])
+@login_required
+@admin_login_required
 def updatesubscription():
     selected_subscription = request.form['subscription_id']
     
@@ -99,6 +134,8 @@ def updatesubscription():
 
 
 @app.route("/operations/<subscriptionid>")
+@login_required
+@admin_login_required
 def operations(subscriptionid):
     subname = request.args.get('subscriptionname')
     sub_operations_by_subid = amprepo.get_sub_operations(subscriptionid)
@@ -110,6 +147,8 @@ def operations(subscriptionid):
 # todo change quantity
 # need to save the response
 @app.route("/updateoperation/<operationid>")
+@login_required
+@admin_login_required
 def updateoperation(operationid):
     subid = request.args.get('subid')
     planid = request.args.get('planid')
@@ -129,10 +168,11 @@ def logout():
         app_config.AUTHORITY + "/common/oauth2/v2.0/logout" +
         "?post_logout_redirect_uri=" + url_for("login", _external=True, _scheme=app_config.HTTP_SCHEME))
 
-
 @app.before_request
 def before_request_func():
-    app.logger.info(request.endpoint)
-    token = utils._get_token_from_cache(app_config.SCOPE)
-    if (not session.get("user") or session.get("user") is None or not token or token is None) and request.endpoint !='login' and request.endpoint !='authorized':
-        return redirect(url_for("login"))
+    global requested_url
+    if not session.get("user") and request.endpoint != 'authorized' and request.endpoint != 'login' and request.endpoint != 'webhook':
+        requested_url = request.url
+
+    if session.get("user") and request.endpoint != 'authorized' and request.endpoint != 'login' and request.endpoint != 'webhook':
+        requested_url = None
