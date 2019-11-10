@@ -45,18 +45,22 @@
             <input type="hidden"  id="subscription_plan_id" name="subscription_plan_id" value="{{ subscription.planId }}">
         </div>
     </div>
+    {% if subscription.saasSubscriptionStatus != 'PendingFulfillmentStart'%}
         <div class="form-group row">
             <label class="col-sm-3 col-form-label">Available Plans:</label>
             <div class="col-sm-9">
                 <select name="selectedplan" class="form-control" width="300px">
                     {% for key, plans in available_plans.items() %}
                         {% for item in plans %}
-                            <option value="{{ item.planId }}" SELECTED>{{ item.planId }}</option>
+                            {% if item.planId != subscription.planId %}
+                                <option value="{{ item.planId }}">{{ item.planId }}</option>
+                            {% endif %}
                         {% endfor %}
                     {% endfor %}
                 </select>
             </div>
         </div>
+    {% endif %}
         
         <div class="form-group row">
         {% if subscription.saasSubscriptionStatus == 'PendingFulfillmentStart'%}
