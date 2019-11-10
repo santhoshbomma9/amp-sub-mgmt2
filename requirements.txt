@@ -15,7 +15,6 @@ azure-nspkg
 azure-storage
 cryptography
 PyJWT
-gunicorn
 flask-sendgrid
 
 #https://github.com/Microsoft/python-sample-vscode-flask-tutorial

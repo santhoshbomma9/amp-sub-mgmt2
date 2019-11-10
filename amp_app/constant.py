@@ -1,6 +1,7 @@
 from . import app_config
 
 MANAGE_SUBSCRIPTION_PAGE = 'managesubscription.html'
+CUSTOMER_MANAGE_SUBSCRIPTION_PAGE = 'managesubscriptioncustomer.html'
 SUBSCRIPTION_OPERATIONS_PAGE = 'suboperations.html'
 ERROR_PAGE = 'error.html'
 

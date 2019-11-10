@@ -1,10 +1,12 @@
 import uuid
 import msal
 from flask import (
-    Flask, jsonify, redirect, render_template, request, session, url_for)
+    Flask, jsonify, redirect, render_template, request, session, url_for, flash)
 from flask_session import Session
 from . import amprepo, app_config, constant, utils, app
 from functools import wraps
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 
 app.config.from_object(app_config)
 Session(app)
@@ -91,9 +93,32 @@ def webhook():
         return jsonify("An exception occurred"), 500
 
 
-@app.route("/landingpage")
+@app.route("/landingpage", methods=['GET', 'POST'])
 @login_required
 def landingpage():
+
+    if request.method == 'POST':
+        selected_subscription = request.form['subscription_id']
+        action = ''
+        if 'activate' in request.form:
+            selected_plan = request.form['subscription_plan_id']
+            action = 'ACTIVATE'
+        elif 'update' in request.form:
+            selected_plan = request.form['selectedplan']
+            action = 'UPDATE'
+        
+        message = Mail(
+            from_email='santhoshgoud21984@gmail.com',
+            to_emails='v-sanbom@microsoft.com',
+            subject='Sending with Twilio SendGrid is Fun',
+            html_content=f'<strong>and easy {selected_subscription} {selected_plan} {action} to do anywhere, even with Python</strong>')
+        try:
+            sendgrid_client = SendGridAPIClient('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')
+            response = sendgrid_client.send(message)
+            flash(f'{response.status_code} Message sent successfully')
+        except Exception as e:
+            flash(e.message, 'error')
+
     token = request.args.get('token')
     subscription = amprepo.get_subscriptionid_by_token(token)
     if not token or 'id' not in subscription:
@@ -101,7 +126,7 @@ def landingpage():
     subscription_data = amprepo.get_subscription(subscription['id'])
     plans = amprepo.get_availableplans(subscription['id'])
     
-    return render_template(constant.MANAGE_SUBSCRIPTION_PAGE, user=session["user"], subscription=subscription_data, available_plans=plans)
+    return render_template(constant.CUSTOMER_MANAGE_SUBSCRIPTION_PAGE, user=session["user"], subscription=subscription_data, available_plans=plans)
 
 
 @app.route("/edit/<subscriptionid>")
