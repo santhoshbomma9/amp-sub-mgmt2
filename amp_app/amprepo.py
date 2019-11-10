@@ -127,14 +127,14 @@ def call_marketplace_api(request_url, request_method='GET', request_payload='', 
                               'x-ms-correlationid': str(uuid.uuid4())}
 
     if request_method == 'GET':
-        reponse_data = requests.get(request_url, headers=marketplaceheaders).json()
-        return reponse_data
+        response_data = requests.get(request_url, headers=marketplaceheaders).json()
+        return response_data
     elif request_method == 'POST':
-        reponse_data = requests.post(request_url, headers=marketplaceheaders, data=request_payload)
-        return reponse_data
+        response_data = requests.post(request_url, headers=marketplaceheaders, data=request_payload)
+        return response_data
     elif request_method == 'PATCH':
-        reponse_data = requests.patch(request_url, headers=marketplaceheaders, data=request_payload)
-        return reponse_data
+        response_data = requests.patch(request_url, headers=marketplaceheaders, data=request_payload)
+        return response_data
     elif request_method == 'DELETE':
-        reponse_data = requests.delete(request_url, headers=marketplaceheaders)
-        return reponse_data
+        response_data = requests.delete(request_url, headers=marketplaceheaders)
+        return response_data
