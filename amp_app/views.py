@@ -108,12 +108,12 @@ def landingpage():
             action = 'UPDATE'
         
         message = Mail(
-            from_email='santhoshgoud21984@gmail.com',
-            to_emails='v-sanbom@microsoft.com',
+            from_email=app_config.SENDGRID_FROM_EMAIL,
+            to_emails=app_config.SENDGRID_TO_EMAIL,
             subject='Sending with Twilio SendGrid is Fun',
             html_content=f'<strong>and easy {selected_subscription} {selected_plan} {action} to do anywhere, even with Python</strong>')
         try:
-            sendgrid_client = SendGridAPIClient('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')
+            sendgrid_client = SendGridAPIClient(app_config.SENDGRID_APIKEY)
             response = sendgrid_client.send(message)
             flash(f'{response.status_code} Message sent successfully')
         except Exception as e:

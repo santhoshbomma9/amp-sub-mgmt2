@@ -52,6 +52,17 @@ HTTP_SCHEME = os.getenv('HTTP_SCHEME')
 if not HTTP_SCHEME:
      raise ValueError("Need to define HTTP_SCHEME environment variable")
 
+
+SENDGRID_APIKEY = os.getenv('SENDGRID_APIKEY')
+if not SENDGRID_APIKEY:
+     raise ValueError("Need to define SENDGRID_APIKEY environment variable")
+SENDGRID_FROM_EMAIL = os.getenv('SENDGRID_FROM_EMAIL')
+if not SENDGRID_FROM_EMAIL:
+     raise ValueError("Need to define SENDGRID_FROM_EMAIL environment variable")
+SENDGRID_TO_EMAIL = os.getenv('SENDGRID_TO_EMAIL')
+if not SENDGRID_TO_EMAIL:
+     raise ValueError("Need to define SENDGRID_TO_EMAIL environment variable")
+
 REDIRECT_PATH = '/getAToken'
 SESSION_TYPE = "filesystem"  # So token cache will be stored in server-side session
 SCOPE = [""]
