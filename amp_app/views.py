@@ -12,6 +12,7 @@ app.config.from_object(app_config)
 Session(app)
 requested_url =''
 
+
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -32,7 +33,8 @@ def admin_login_required(f):
 
 @app.errorhandler(404)
 def page_not_found(e):
-    return render_template(constant.ERROR_PAGE, user=session["user"]), 404
+    return render_template('404.html', user=session["user"]), 404
+
 
 @app.route("/")
 def login():
@@ -57,7 +59,6 @@ def login():
 def dashboard():
     subscriptions = amprepo.get_subscriptions()
     return render_template('index.html', user=session["user"], subscriptions=subscriptions, version=msal.__version__)
-
 
 
 @app.route(app_config.REDIRECT_PATH)  # your app's redirect_uri set in AAD
@@ -183,7 +184,6 @@ def updateoperation(operationid):
     return redirect(url_for("operations", subscriptionid=subid))
 
 # todo delete subscription
-
 
 @app.route("/logout")
 def logout():
