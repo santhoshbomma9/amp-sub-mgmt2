@@ -1,32 +1,15 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<script>
-$(document).ready(function() {
-    $('th').click(function(){
-    var table = $(this).parents('table').eq(0)
-    var rows = table.find('tr:gt(0)').toArray().sort(comparer($(this).index()))
-    this.asc = !this.asc
-    if (!this.asc){rows = rows.reverse()}
-    for (var i = 0; i < rows.length; i++){table.append(rows[i])}
-})
-
-function comparer(index) {
-    return function(a, b) {
-        var valA = getCellValue(a, index), valB = getCellValue(b, index)
-        return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.toString().localeCompare(valB)
-    }
-}
-
-function getCellValue(row, index){ return $(row).children('td').eq(index).text() }
-
-});
-</script>
+<script src="/static/scripts/customlogic.js"></script>
 
 <div class="jumbotron">
     <h1>Subscriptions</h1>
 </div>
-
+<div class="row">
+    <input type="text" class="form-control" id="mySearch" onkeyup="doSearch()" placeholder="Search for subscriptions..">
+</div>
+<br>
 <div class="row">
     <table  id="subscriptionTable" class="table table-striped table-bordered table-hover">
         <thead>
@@ -44,7 +27,7 @@ function getCellValue(row, index){ return $(row).children('td').eq(index).text()
         <tbody>
             {% for item in subscriptions %}
                 <tr>
-                    <th scope="row">{{ item['name'] }}</th>
+                    <td scope="row">{{ item['name'] }}</td>
                     <td>{{ item['saasSubscriptionStatus'] }}</td>
                     <td>{{ item['offerId'] }}</td>
                     <td>{{ item['planId'] }}</td>
