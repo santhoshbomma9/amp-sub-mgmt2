@@ -1,13 +1,34 @@
 {% extends "layout.html" %}
 
 {% block content %}
+<script>
+$(document).ready(function() {
+    $('th').click(function(){
+    var table = $(this).parents('table').eq(0)
+    var rows = table.find('tr:gt(0)').toArray().sort(comparer($(this).index()))
+    this.asc = !this.asc
+    if (!this.asc){rows = rows.reverse()}
+    for (var i = 0; i < rows.length; i++){table.append(rows[i])}
+})
+
+function comparer(index) {
+    return function(a, b) {
+        var valA = getCellValue(a, index), valB = getCellValue(b, index)
+        return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.toString().localeCompare(valB)
+    }
+}
+
+function getCellValue(row, index){ return $(row).children('td').eq(index).text() }
+
+});
+</script>
 
 <div class="jumbotron">
     <h1>Subscriptions</h1>
 </div>
 
 <div class="row">
-    <table class="table table-striped table-bordered table-hover">
+    <table  id="subscriptionTable" class="table table-striped table-bordered table-hover">
         <thead>
             <tr>
                 <th scope="col">Name</th>
@@ -21,34 +42,32 @@
             </tr>
         </thead>
         <tbody>
-            {% for key, subscription in subscriptions.items() %}
-                {% for item in subscription %}
-                    <tr>
-                        <th scope="row">{{ item['name'] }}</th>
-                        <td>{{ item['saasSubscriptionStatus'] }}</td>
-                        <td>{{ item['offerId'] }}</td>
-                        <td>{{ item['planId'] }}</td>
-                        <td class="text-center">{{ item['quantity'] }}</td>
-                        <td>{{ item['id'] }}</td>
-                        <td>{{ item['allowedCustomerOperations'] }}</td>
-                        <td class="text-center">
+            {% for item in subscriptions %}
+                <tr>
+                    <th scope="row">{{ item['name'] }}</th>
+                    <td>{{ item['saasSubscriptionStatus'] }}</td>
+                    <td>{{ item['offerId'] }}</td>
+                    <td>{{ item['planId'] }}</td>
+                    <td class="text-center">{{ item['quantity'] }}</td>
+                    <td>{{ item['id'] }}</td>
+                    <td>{{ item['allowedCustomerOperations'] }}</td>
+                    <td class="text-center">
+                        {% if item['saasSubscriptionStatus'] !="Unsubscribed"  %}
+                        <a href={{ url_for('edit', subscriptionid=item['id']) }} class="btn btn-primary btn-sm active" role="button" aria-pressed="true">
+                            Change Plan</a>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
                             {% if item['saasSubscriptionStatus'] !="Unsubscribed"  %}
                             <a href={{ url_for('edit', subscriptionid=item['id']) }} class="btn btn-primary btn-sm active" role="button" aria-pressed="true">
-                                Change Plan</a>
+                                UnSubscribe</a>
                             {% endif %}
                         </td>
-                        <td class="text-center">
-                                {% if item['saasSubscriptionStatus'] !="Unsubscribed"  %}
-                                <a href={{ url_for('edit', subscriptionid=item['id']) }} class="btn btn-primary btn-sm active" role="button" aria-pressed="true">
-                                    UnSubscribe</a>
-                                {% endif %}
-                            </td>
-                        <td  class="text-center">
-                            <a href={{ url_for('operations', subscriptionid=item['id'], subscriptionname=item['name']) }} class="btn btn-primary btn-sm active">
-                                Operations</a>
-                        </td>
-                    </tr>
-                {% endfor %}
+                    <td  class="text-center">
+                        <a href={{ url_for('operations', subscriptionid=item['id'], subscriptionname=item['name']) }} class="btn btn-primary btn-sm active">
+                            Operations</a>
+                    </td>
+                </tr>
             {% endfor %}
         </tbody>
     </table>

@@ -62,7 +62,8 @@ def login():
 @login_required
 @admin_login_required
 def dashboard():
-    subscriptions = amprepo.get_subscriptions()
+    subscriptions_root = amprepo.get_subscriptions()
+    subscriptions = subscriptions_root['subscriptions']
     return render_template('index.html', user=session["user"], subscriptions=subscriptions, version=msal.__version__)
 
 
