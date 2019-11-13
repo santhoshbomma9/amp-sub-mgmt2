@@ -29,7 +29,7 @@ def get_availableplans(subscription_id):
 
 
 def activate_subscriptionplan(subscription_id, plan_id):
-    request_plan_payload = f"{{'planId':'{plan_id}', 'quantity': 0 }}"
+    request_plan_payload = f"{{'planId':'{plan_id}', 'quantity': '' }}"
     activateresponse = call_marketplace_api(constant.ACTIVATE_SUBSCRIPTION_ENDPOINT(subscription_id),
     'POST', request_plan_payload)
     return activateresponse
