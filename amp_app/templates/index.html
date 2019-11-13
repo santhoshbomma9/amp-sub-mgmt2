@@ -35,20 +35,9 @@
                     <td>{{ item['id'] }}</td>
                     <td>{{ item['allowedCustomerOperations'] }}</td>
                     <td class="text-center">
-                        {% if item['saasSubscriptionStatus'] == "PendingFulfillmentStart" %}
-                            <a href={{ url_for('edit', subscriptionid=item['id']) }} class="btn btn-primary btn-sm active" role="button" aria-pressed="true">
-                                Activate </a>
-                        {% elif item['saasSubscriptionStatus'] !="Unsubscribed"  %}
-                            <a href={{ url_for('edit', subscriptionid=item['id']) }} class="btn btn-primary btn-sm active" role="button" aria-pressed="true">
-                                Change Plan</a>
-                        {% endif %}
+                        <a href={{ url_for('edit', subscriptionid=item['id']) }} class="btn btn-primary btn-sm active" role="button" aria-pressed="true">
+                            Edit </a>
                     </td>
-                    <td class="text-center">
-                            {% if item['saasSubscriptionStatus'] !="Unsubscribed"  %}
-                            <a href={{ url_for('edit', subscriptionid=item['id']) }} class="btn btn-primary btn-sm active" role="button" aria-pressed="true">
-                                UnSubscribe</a>
-                            {% endif %}
-                        </td>
                     <td  class="text-center">
                         <a href={{ url_for('operations', subscriptionid=item['id'], subscriptionname=item['name']) }} class="btn btn-primary btn-sm active">
                             Operations</a>
