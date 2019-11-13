@@ -58,15 +58,6 @@ def login():
             return redirect(url_for("dashboard"))
 
 
-@app.route("/dashboard")
-@login_required
-@admin_login_required
-def dashboard():
-    subscriptions_root = amprepo.get_subscriptions()
-    subscriptions = subscriptions_root['subscriptions']
-    return render_template('index.html', user=session["user"], subscriptions=subscriptions, version=msal.__version__)
-
-
 @app.route(app_config.REDIRECT_PATH)  # your app's redirect_uri set in AAD
 def authorized():
     if request.args.get('state') == session.get("state"):
@@ -82,6 +73,15 @@ def authorized():
         session["isadmin"] = app_config.TENANT_ID in session["user"]['iss']
         utils._save_cache(cache)
     return redirect(url_for("login"))
+
+
+@app.route("/dashboard")
+@login_required
+@admin_login_required
+def dashboard():
+    subscriptions_root = amprepo.get_subscriptions()
+    subscriptions = subscriptions_root['subscriptions']
+    return render_template('index.html', user=session["user"], subscriptions=subscriptions, version=msal.__version__)
 
 
 @app.route("/webhook", methods=['POST'])
@@ -136,33 +136,31 @@ def landingpage():
     return render_template(constant.CUSTOMER_MANAGE_SUBSCRIPTION_PAGE, user=session["user"], subscription=subscription_data, available_plans=plans)
 
 
-@app.route("/edit/<subscriptionid>")
+# todo delete subscription
+@app.route("/edit/<subscriptionid>", methods=['GET', 'POST'])
 @login_required
 def edit(subscriptionid):
     subscription = amprepo.get_subscription(subscriptionid)
     plans = amprepo.get_availableplans(subscriptionid)
-    return render_template(constant.MANAGE_SUBSCRIPTION_PAGE, user=session["user"], subscription=subscription, available_plans=plans)
 
-
-@app.route("/update", methods=['POST'])
-@login_required
-@admin_login_required
-def updatesubscription():
-    selected_subscription = request.form['subscription_id']
+    if request.method == 'POST':
+        selected_subscription = request.form['subscription_id']
     
-    if 'activate' in request.form:
-        selected_plan = request.form['subscription_plan_id']
-        response = amprepo.activate_subscriptionplan(selected_subscription, selected_plan)
-    elif 'update' in request.form:
-        selected_plan = request.form['selectedplan']
-        response = amprepo.update_subscriptionplan(selected_subscription, selected_plan)
-    else:
-        return redirect(url_for(constant.ERROR_PAGE))
+        if 'activate' in request.form:
+            selected_plan = request.form['subscription_plan_id']
+            response = amprepo.activate_subscriptionplan(selected_subscription, selected_plan)
+        elif 'update' in request.form:
+            selected_plan = request.form['selectedplan']
+            response = amprepo.update_subscriptionplan(selected_subscription, selected_plan)
+        else:
+            return redirect(url_for(constant.ERROR_PAGE))
 
-    if response.status_code == 202 or response.status_code:
-        return redirect(url_for("login"))
-    else:
-        return render_template(constant.ERROR_PAGE, user=session["user"], response_statuscode=response.status_code)
+        if response.status_code == 202 or response.status_code:
+            flash(f'{response.status_code} Update successfully')
+        else:
+            flash(response.status_code, 'Update not successfully')
+
+    return render_template(constant.MANAGE_SUBSCRIPTION_PAGE, user=session["user"], subscription=subscription, available_plans=plans)
 
 
 @app.route("/operations/<subscriptionid>")
@@ -178,18 +176,26 @@ def operations(subscriptionid):
 
 # todo change quantity
 # need to save the response
-@app.route("/updateoperation/<operationid>")
+@app.route("/updateoperation/<operationid>", methods=['GET', 'POST'])
 @login_required
 @admin_login_required
 def updateoperation(operationid):
     subid = request.args.get('subid')
     planid = request.args.get('planid')
     quantity = request.args.get('quantity')
-    status = request.args.get('status')
-    request_payload = amprepo.update_sub_operation(subid, operationid, planid, quantity, status)
-    return redirect(url_for("operations", subscriptionid=subid))
+    subsciptionname = request.args.get('subsciptionname')
 
-# todo delete subscription
+    if request.method == 'POST':
+        status = ''
+        if 'success' in request.form:
+            status = 'Success'
+        elif 'failure' in request.form:
+            status = 'Failure'
+
+        request_payload = amprepo.update_sub_operation(subid, operationid, planid, quantity, status)
+
+    return render_template("suboperationmanage.html", user=session["user"], subid=subid, planid=planid, quantity=quantity, subsciptionname=subsciptionname)
+
 
 @app.route("/logout")
 def logout():

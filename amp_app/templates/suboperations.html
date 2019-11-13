@@ -3,7 +3,7 @@
 {% block content %}
 
 <div class="jumbotron">
-    <h1>Subscription Operations</h1>
+    <h1>Subscription Operations(Only webhook operations can be patched)</h1>
 </div>
 <div class="row">
     <h3 class="lead">Subscription: <b> {{subsciptionname}} ({{subscriptionid}})</b></h3>
@@ -47,10 +47,7 @@
                             <td>{{ operation['errorStatusCode'] }}</td>
                             <td>{{ operation['errorMessage'] }}</td>
                             <td  class="text-center">
-                                <a href={{ url_for('updateoperation', operationid=operation['id'], subid=operation['subscriptionId'], planid=operation['planId'], quantity=operation['quantity'], status= "Success") }} class="btn btn-primary btn-sm active">Success</a>
-                            </td>
-                            <td  class="text-center">
-                                <a href={{ url_for('updateoperation', operationid=operation['id'], subid=operation['subscriptionId'], planid=operation['planId'], quantity=operation['quantity'], status= "Failure") }} class="btn btn-primary btn-sm active">Failure</a>
+                                <a href={{ url_for('updateoperation', operationid=operation['id'], subid=operation['subscriptionId'], planid=operation['planId'], quantity=operation['quantity'], subsciptionname= subsciptionname ) }} class="btn btn-primary btn-sm active">Edit</a>
                             </td>
                         </tr>
                     {% endfor %}
@@ -72,10 +69,7 @@
                             <td>{{ operation['errorStatusCode'] }}</td>
                             <td>{{ operation['errorMessage'] }}</td>
                             <td  class="text-center">
-                                <a href={{ url_for('updateoperation', operationid=operation['id'], subid=operation['subscriptionId'], planid=operation['planId'], quantity=operation['quantity'], status= "Success") }} class="btn btn-primary btn-sm active">Success</a>
-                            </td>
-                            <td  class="text-center">
-                                <a href={{ url_for('updateoperation', operationid=operation['id'], subid=operation['subscriptionId'], planid=operation['planId'], quantity=operation['quantity'], status= "Failure") }} class="btn btn-primary btn-sm active">Failure</a>
+                                <a href={{ url_for('updateoperation', operationid=operation['id'], subid=operation['subscriptionId'], planid=operation['planId'], quantity=operation['quantity'],  subsciptionname= subsciptionname ) }} class="btn btn-primary btn-sm active">Edit</a>
                             </td>
                         </tr>
                     {% endfor %}
@@ -97,10 +91,7 @@
                             <td>{{ operation['errorStatusCode'] }}</td>
                             <td>{{ operation['errorMessage'] }}</td>
                             <td  class="text-center">
-                                <a href={{ url_for('updateoperation', operationid=operation['id'], subid=operation['subscriptionId'], planid=operation['planId'], quantity=operation['quantity'], status= "Success") }} class="btn btn-primary btn-sm active">Success</a>
-                            </td>
-                            <td  class="text-center">
-                                <a href={{ url_for('updateoperation', operationid=operation['id'], subid=operation['subscriptionId'], planid=operation['planId'], quantity=operation['quantity'], status= "Failure") }} class="btn btn-primary btn-sm active">Failure</a>
+                                <a href={{ url_for('updateoperation', operationid=operation['id'], subid=operation['subscriptionId'], planid=operation['planId'], quantity=operation['quantity'],  subsciptionname= subsciptionname ) }} class="btn btn-primary btn-sm active">Edit</a>
                             </td>
                         </tr>
                     {% endfor %}
