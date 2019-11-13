@@ -200,6 +200,13 @@ def updateoperation(operationid):
 
     return render_template("suboperationmanage.html", user=session["user"], subid=subid, planid=planid, quantity=quantity, subsciptionname=subsciptionname)
 
+@app.route("/privacy")
+def privacy():
+    return 'This is a sample privacy policy'
+
+@app.route("/support")
+def support():
+    return 'This is a sample support'
 
 @app.route("/logout")
 def logout():
