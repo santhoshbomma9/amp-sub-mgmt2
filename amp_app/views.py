@@ -84,58 +84,6 @@ def dashboard():
     return render_template('index.html', user=session["user"], subscriptions=subscriptions, version=msal.__version__)
 
 
-@app.route("/webhook", methods=['POST'])
-def webhook():
-
-    try:
-        utils._validate_jwt_token(request.headers.get('Authorization'))
-        # connect to table storage
-        request_payload = request.get_json(force=True)
-        request_payload["PartitionKey"] = request_payload['subscriptionId']
-        request_payload["RowKey"] = request_payload['id']
-        utils._store_in_azure_table(app_config.WEBHOOK_OPS_STORAGE_TABLE_NAME, request_payload)
-        return jsonify(), 201
-    except Exception as e:
-        app.logger.error(e)
-        return jsonify("An exception occurred"), 500
-
-
-@app.route("/landingpage", methods=['GET', 'POST'])
-@login_required
-def landingpage():
-
-    if request.method == 'POST':
-        selected_subscription = request.form['subscription_id']
-        action = ''
-        if 'activate' in request.form:
-            selected_plan = request.form['subscription_plan_id']
-            action = 'ACTIVATE'
-        elif 'update' in request.form:
-            selected_plan = request.form['selectedplan']
-            action = 'UPDATE'
-        
-        message = Mail(
-            from_email=app_config.SENDGRID_FROM_EMAIL,
-            to_emails=app_config.SENDGRID_TO_EMAIL,
-            subject='Sending with Twilio SendGrid is Fun',
-            html_content=f'<strong>and easy {selected_subscription} {selected_plan} {action} to do anywhere, even with Python</strong>')
-        try:
-            sendgrid_client = SendGridAPIClient(app_config.SENDGRID_APIKEY)
-            response = sendgrid_client.send(message)
-            flash(f'{response.status_code} Message sent successfully')
-        except Exception as e:
-            flash(e.message, 'error')
-
-    token = request.args.get('token')
-    subscription = amprepo.get_subscriptionid_by_token(token)
-    if not token or 'id' not in subscription:
-        return render_template(constant.ERROR_PAGE, user=session["user"])  
-    subscription_data = amprepo.get_subscription(subscription['id'])
-    plans = amprepo.get_availableplans(subscription['id'])
-    
-    return render_template(constant.CUSTOMER_MANAGE_SUBSCRIPTION_PAGE, user=session["user"], subscription=subscription_data, available_plans=plans)
-
-
 # todo delete subscription
 @app.route("/edit/<subscriptionid>", methods=['GET', 'POST'])
 @login_required
@@ -200,13 +148,68 @@ def updateoperation(operationid):
 
     return render_template("suboperationmanage.html", user=session["user"], subid=subid, planid=planid, quantity=quantity, subsciptionname=subsciptionname)
 
+
+@app.route("/webhook", methods=['POST'])
+def webhook():
+
+    try:
+        utils._validate_jwt_token(request.headers.get('Authorization'))
+        # connect to table storage
+        request_payload = request.get_json(force=True)
+        request_payload["PartitionKey"] = request_payload['subscriptionId']
+        request_payload["RowKey"] = request_payload['id']
+        utils._store_in_azure_table(app_config.WEBHOOK_OPS_STORAGE_TABLE_NAME, request_payload)
+        return jsonify(), 201
+    except Exception as e:
+        app.logger.error(e)
+        return jsonify("An exception occurred"), 500
+
+
+@app.route("/landingpage", methods=['GET', 'POST'])
+@login_required
+def landingpage():
+
+    if request.method == 'POST':
+        selected_subscription = request.form['subscription_id']
+        action = ''
+        if 'activate' in request.form:
+            selected_plan = request.form['subscription_plan_id']
+            action = 'ACTIVATE'
+        elif 'update' in request.form:
+            selected_plan = request.form['selectedplan']
+            action = 'UPDATE'
+        
+        message = Mail(
+            from_email=app_config.SENDGRID_FROM_EMAIL,
+            to_emails=app_config.SENDGRID_TO_EMAIL,
+            subject='Sending with Twilio SendGrid is Fun',
+            html_content=f'<strong>and easy {selected_subscription} {selected_plan} {action} to do anywhere, even with Python</strong>')
+        try:
+            sendgrid_client = SendGridAPIClient(app_config.SENDGRID_APIKEY)
+            response = sendgrid_client.send(message)
+            flash(f'{response.status_code} Message sent successfully')
+        except Exception as e:
+            flash(e.message, 'error')
+
+    token = request.args.get('token')
+    subscription = amprepo.get_subscriptionid_by_token(token)
+    if not token or 'id' not in subscription:
+        return render_template(constant.ERROR_PAGE, user=session["user"])  
+    subscription_data = amprepo.get_subscription(subscription['id'])
+    plans = amprepo.get_availableplans(subscription['id'])
+    
+    return render_template(constant.CUSTOMER_MANAGE_SUBSCRIPTION_PAGE, user=session["user"], subscription=subscription_data, available_plans=plans)
+
+
 @app.route("/privacy")
 def privacy():
     return 'This is a sample privacy policy'
 
+
 @app.route("/support")
 def support():
     return 'This is a sample support'
+
 
 @app.route("/logout")
 def logout():
@@ -215,6 +218,7 @@ def logout():
         #app_config.AUTHORITY + "/" + app_config.TENANT_ID + "/oauth2/v2.0/logout" +
         app_config.AUTHORITY + "/common/oauth2/v2.0/logout" +
         "?post_logout_redirect_uri=" + url_for("login", _external=True, _scheme=app_config.HTTP_SCHEME))
+
 
 @app.before_request
 def before_request_func():
