@@ -192,7 +192,11 @@ def updateoperation(operationid):
         elif 'failure' in request.form:
             status = 'Failure'
 
-        request_payload = amprepo.update_sub_operation(subid, operationid, planid, quantity, status)
+        response = amprepo.update_sub_operation(subid, operationid, planid, quantity, status)
+        if response.status_code and response.status_code == 200:
+            flash(f'{response.status_code} Patch successfull')
+        else:
+            flash(f'{response.text} Update not successfull')
 
     return render_template("suboperationmanage.html", user=session["user"], subid=subid, planid=planid, quantity=quantity, subsciptionname=subsciptionname)
 
