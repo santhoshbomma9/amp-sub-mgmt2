@@ -146,7 +146,7 @@ def updateoperation(operationid):
         else:
             flash(f'{response.text} Update not successfull')
 
-    return render_template("suboperationmanage.html", user=session["user"], subid=subid, planid=planid, quantity=quantity, subsciptionname=subsciptionname)
+    return render_template("suboperationmanage.html", user=session["user"], operationid=operationid,subid=subid, planid=planid, quantity=quantity, subsciptionname=subsciptionname)
 
 
 @app.route("/webhook", methods=['POST'])

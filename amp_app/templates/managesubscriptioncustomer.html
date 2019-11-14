@@ -21,27 +21,21 @@
 <form method="post" style="font-size: 20px;">
     <div class="form-group row">
         <label class="col-sm-3 col-form-label">Subscription Name:</label>
-        <div class="col-sm-9">
-            <label class="col-sm-3">{{ subscription.name }}</label>
-        </div>
+        <div class="col-sm-9">{{ subscription.name }}</div>
     </div>
     <div class="form-group row">
         <label class="col-sm-3 col-form-label">Subscription Id:</label>
-        <div class="col-sm-9">
-            <label class="col-sm-9">{{ subscription.id }}</label>
+        <div class="col-sm-9">{{ subscription.id }}
             <input type="hidden" id="subscription_id" name="subscription_id" value={{ subscription.id }}>
         </div>
     </div>
     <div class="form-group row">
         <label class="col-sm-3 col-form-label">Current Offer:</label>
-        <div class="col-sm-9">
-            <label class="col-sm-9">{{ subscription.offerId }}</label>
-        </div>
+        <div class="col-sm-9">{{ subscription.offerId }}</div>
     </div>
     <div class="form-group row">
         <label class="col-sm-3 col-form-label">Current Plan:</label>
-        <div class="col-sm-9">
-            <label class="col-sm-10">{{ subscription.planId }}</label>
+        <div class="col-sm-9">{{ subscription.planId }}
             <input type="hidden"  id="subscription_plan_id" name="subscription_plan_id" value="{{ subscription.planId }}">
         </div>
     </div>
