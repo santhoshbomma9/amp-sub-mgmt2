@@ -63,6 +63,8 @@ SENDGRID_TO_EMAIL = os.getenv('SENDGRID_TO_EMAIL')
 if not SENDGRID_TO_EMAIL:
      raise ValueError("Need to define SENDGRID_TO_EMAIL environment variable")
 
+Dimension_Data = os.getenv('Dimension_Data')
+
 REDIRECT_PATH = '/getAToken'
 SESSION_TYPE = "filesystem"  # So token cache will be stored in server-side session
 SCOPE = [""]

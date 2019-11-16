@@ -1,5 +1,6 @@
 import uuid
 import msal
+import json
 from flask import (
     Flask, jsonify, redirect, render_template, request, session, url_for, flash)
 from flask_session import Session
@@ -107,8 +108,16 @@ def edit(subscriptionid):
             flash(f'{response.status_code} Update successfully')
         else:
             flash(response.status_code, 'Update not successfully')
+    
+    filtered_dimensions_by_offer = None
+    if app_config.Dimension_Data:
+        dimensions = json.loads(app_config.Dimension_Data)
+        filtered_dimensions_by_offer= dimensions[subscription['offerId']]
+        print(filtered_dimensions_by_offer)
+    
+    return render_template(constant.MANAGE_SUBSCRIPTION_PAGE, user=session["user"], subscription=subscription, available_plans=plans, dimension=filtered_dimensions_by_offer)
 
-    return render_template(constant.MANAGE_SUBSCRIPTION_PAGE, user=session["user"], subscription=subscription, available_plans=plans)
+
 
 
 @app.route("/operations/<subscriptionid>")
@@ -205,10 +214,27 @@ def landingpage():
 def privacy():
     return 'This is a sample privacy policy'
 
-
-@app.route("/support")
+@app.route("/support", methods=['GET', 'POST'])
+@login_required
 def support():
-    return 'This is a sample support'
+    if request.method == 'POST':
+        replyEmail = request.form['email']
+        question = request.form['message']
+        
+        message = Mail(
+            from_email=app_config.SENDGRID_FROM_EMAIL,
+            to_emails=app_config.SENDGRID_TO_EMAIL,
+            subject='Sending with Twilio SendGrid is Fun',
+            html_content=f'<strong>and easy {question}  {replyEmail} to do anywhere, even with Python</strong>')
+        try:
+            sendgrid_client = SendGridAPIClient(app_config.SENDGRID_APIKEY)
+            response = sendgrid_client.send(message)
+            flash(f'{response.status_code} Message sent successfully')
+        except Exception as e:
+            flash(e.message, 'error')
+    
+
+    return render_template('support.html', user=session["user"])
 
 
 @app.route("/logout")
